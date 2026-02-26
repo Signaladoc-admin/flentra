@@ -1,0 +1,42 @@
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  websecure:
+    address: ":443"
+    http3: {}   # HTTP/3 per-entrypoint in v3
+
+serversTransport:
+  maxIdleConnsPerHost: 64
+  forwardingTimeouts:
+    dialTimeout: "10s"
+    responseHeaderTimeout: "30s"
+    idleConnTimeout: "90s"
+
+api:
+  dashboard: true         # Not exposed unless you publish :8080
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "am.onyeke@gmail.com"
+      storage: /acme/acme.json
+      httpChallenge:
+        entryPoint: web   # ACME HTTP-01 served before redirect logic
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: "stack_web"  # <— IMPORTANT: the actual Docker network name
+  file:
+    filename: /etc/traefik/dynamic.yml
+
+accessLog: {}
+log:
+  level: INFO

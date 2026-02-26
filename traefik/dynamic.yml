@@ -1,0 +1,39 @@
+http:
+  routers:
+    traefik-dashboard:
+      rule: "Host(`monitoring.dev.marimaxglobal.ng`)"
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      service: api@internal
+      middlewares:
+        - auth
+        - gzip
+        - security-headers
+        - ratelimit
+
+  middlewares:
+    auth:
+      basicAuth:
+        users:
+          - "admin:$apr1$fCirSNyX$du90oSRaoF1JyY3DcgJIm1"
+
+    gzip:
+      compress: {}
+
+    security-headers:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "no-referrer-when-downgrade"
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true
+
+    ratelimit:
+      rateLimit:
+        average: 100
+        burst: 200
+
